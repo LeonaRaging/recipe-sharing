@@ -25,6 +25,7 @@ func main() {
 	recipeHandler := handler.NewRecipeHandler(recipeService)
 
 	http.HandleFunc("/api/recipes", recipeHandler.CreateRecipe)
+	http.HandleFunc("/api/recipes/", recipeHandler.HandleRecipeByID)
 
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", nil)
