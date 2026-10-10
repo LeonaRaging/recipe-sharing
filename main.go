@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"recipe-sharing/internal/auth"
 	"recipe-sharing/internal/handler"
 	"recipe-sharing/internal/repository"
 	"recipe-sharing/internal/service"
@@ -24,9 +25,21 @@ func main() {
 	recipeService := service.NewRecipeService(recipeRepository)
 	recipeHandler := handler.NewRecipeHandler(recipeService)
 
-	http.HandleFunc("/api/recipes", recipeHandler.HandleRecipes)
-	http.HandleFunc("/api/recipes/", recipeHandler.HandleRecipeByID)
+  http.HandleFunc("/api/recipes/", recipeHandler.HandleRecipeByID)
+  http.HandleFunc("/api/recipes", auth.RequireAuth(recipeHandler.HandleRecipes))
+
+	authHandler := setupAuth(db)
+	http.HandleFunc("/api/auth/register", authHandler.Register)
+
+	http.HandleFunc("/api/auth/login", authHandler.Login)
 
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", nil)
+}
+
+func setupAuth(db *gorm.DB) *handler.AuthHandler {
+	userRepository := repository.NewUserRepository(db)
+	userService := service.NewUserService(userRepository)
+
+	return handler.NewAuthHandler(userService)
 }
