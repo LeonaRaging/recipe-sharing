@@ -24,7 +24,7 @@ func main() {
 	recipeService := service.NewRecipeService(recipeRepository)
 	recipeHandler := handler.NewRecipeHandler(recipeService)
 
-	http.HandleFunc("/api/recipes", recipeHandler.CreateRecipe)
+	http.HandleFunc("/api/recipes", recipeHandler.HandleRecipes)
 	http.HandleFunc("/api/recipes/", recipeHandler.HandleRecipeByID)
 
 	fmt.Println("Server running on :8080")

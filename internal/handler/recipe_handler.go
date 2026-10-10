@@ -85,3 +85,20 @@ func (h *RecipeHandler) HandleRecipeByID(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
+
+func (h *RecipeHandler) HandleRecipes(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		h.CreateRecipe(w, r)
+	case http.MethodGet:
+		recipes, err := h.service.GetAllRecipes()
+		if err != nil {
+			http.Error(w, "Failed to get recipes", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(recipes)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}

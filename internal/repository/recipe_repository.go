@@ -36,6 +36,16 @@ func (r *RecipeRepository) GetByID(id int64) (*domain.Recipe, error) {
 	return &recipe, nil
 }
 
+func (r *RecipeRepository) GetAll() ([]domain.Recipe, error) {
+	var recipes []domain.Recipe
+
+	if err := r.db.Find(&recipes).Error; err != nil {
+		return nil, err
+	}
+
+	return recipes, nil
+}
+
 func (r *RecipeRepository) Delete(id int64) error {
 	result := r.db.Delete(&domain.Recipe{}, id)
 	if result.Error != nil {
