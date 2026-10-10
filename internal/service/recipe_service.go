@@ -24,3 +24,15 @@ func (s *RecipeService) CreateRecipe(recipe *domain.Recipe) error {
 
 	return nil
 }
+
+func (s *RecipeService) GetRecipe(id int64) (*domain.Recipe, error) {
+	return s.repo.GetByID(id)
+}
+
+func (s *RecipeService) GetAllRecipes() ([]domain.Recipe, error) {
+	return s.repo.GetAll()
+}
+
+func (s *RecipeService) DeleteRecipe(id int64) error {
+	return s.repo.Delete(id)
+}

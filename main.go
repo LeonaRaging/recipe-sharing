@@ -25,8 +25,8 @@ func main() {
 	recipeService := service.NewRecipeService(recipeRepository)
 	recipeHandler := handler.NewRecipeHandler(recipeService)
 
-	//http.HandleFunc("/api/recipes", recipeHandler.CreateRecipe)
-	http.HandleFunc("/api/recipes", auth.RequireAuth(recipeHandler.CreateRecipe))
+  http.HandleFunc("/api/recipes/", recipeHandler.HandleRecipeByID)
+  http.HandleFunc("/api/recipes", auth.RequireAuth(recipeHandler.HandleRecipes))
 
 	authHandler := setupAuth(db)
 	http.HandleFunc("/api/auth/register", authHandler.Register)
