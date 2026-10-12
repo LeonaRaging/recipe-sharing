@@ -43,62 +43,58 @@ func (h *RecipeHandler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *RecipeHandler) HandleRecipeByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet && r.Method != http.MethodDelete {
-		w.Header().Set("Allow", "GET, DELETE")
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
+func (h *RecipeHandler) HandleGetRecipeByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, "/api/recipes/"), 10, 64)
 	if err != nil || id <= 0 {
 		http.Error(w, "Invalid recipe ID", http.StatusBadRequest)
 		return
 	}
 
-	switch r.Method {
-	case http.MethodGet:
-		recipe, err := h.service.GetRecipe(id)
+	recipe, err := h.service.GetRecipe(id)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		http.Error(w, "Recipe not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		http.Error(w, "Failed to get recipe", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(recipe); err != nil {
+		http.Error(w, "Failed to encode recipe", http.StatusInternalServerError)
+	}
+}
+
+func (h *RecipeHandler) HandleDeleteRecipeByID(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, "/api/recipes/"), 10, 64)
+	if err != nil || id <= 0 {
+		http.Error(w, "Invalid recipe ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.service.DeleteRecipe(id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			http.Error(w, "Recipe not found", http.StatusNotFound)
 			return
 		}
-		if err != nil {
-			http.Error(w, "Failed to get recipe", http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(recipe); err != nil {
-			http.Error(w, "Failed to encode recipe", http.StatusInternalServerError)
-		}
-	case http.MethodDelete:
-		if err := h.service.DeleteRecipe(id); err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				http.Error(w, "Recipe not found", http.StatusNotFound)
-				return
-			}
-			http.Error(w, "Failed to delete recipe", http.StatusInternalServerError)
-			return
-		}
-
-		w.WriteHeader(http.StatusNoContent)
+		http.Error(w, "Failed to delete recipe", http.StatusInternalServerError)
+		return
 	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *RecipeHandler) HandleRecipes(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		h.CreateRecipe(w, r)
-	case http.MethodGet:
-		recipes, err := h.service.GetAllRecipes()
-		if err != nil {
-			http.Error(w, "Failed to get recipes", http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(recipes)
-	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+func (h *RecipeHandler) HandleGetRecipes(w http.ResponseWriter, r *http.Request) {
+	recipes, err := h.service.GetAllRecipes()
+	if err != nil {
+		http.Error(w, "Failed to get recipes", http.StatusInternalServerError)
+		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(recipes)
+}
+
+func (h *RecipeHandler) HandlePostRecipes(w http.ResponseWriter, r *http.Request) {
+	h.CreateRecipe(w, r)
 }
