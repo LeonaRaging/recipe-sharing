@@ -41,6 +41,8 @@ func (h *RecipeHandler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create recipe", http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (h *RecipeHandler) HandleGetRecipeByID(w http.ResponseWriter, r *http.Request) {
