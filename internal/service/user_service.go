@@ -8,7 +8,6 @@ import (
 	"recipe-sharing/internal/repository"
 
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 var ErrEmailExists = errors.New("email already exists")
@@ -28,10 +27,6 @@ func (s *UserService) CreateUser(user *domain.User) error {
 
 	if err == nil {
 		return ErrEmailExists
-	}
-
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword(
