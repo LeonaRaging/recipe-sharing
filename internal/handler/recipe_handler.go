@@ -37,12 +37,15 @@ func (h *RecipeHandler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	recipe.UserID = r.Context().Value("user_id").(int64)
+
 	if err := h.service.CreateRecipe(&recipe); err != nil {
 		http.Error(w, "Failed to create recipe", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(recipe)
 }
 
 func (h *RecipeHandler) HandleGetRecipeByID(w http.ResponseWriter, r *http.Request) {
@@ -75,11 +78,19 @@ func (h *RecipeHandler) HandleDeleteRecipeByID(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if err := h.service.DeleteRecipe(id); err != nil {
+	userID := r.Context().Value("user_id").(int64)
+
+	if err := h.service.DeleteRecipe(id, userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			http.Error(w, "Recipe not found", http.StatusNotFound)
 			return
 		}
+
+		if errors.Is(err, service.ErrForbidden) {
+			http.Error(w, "Only owner can delete this recipe", http.StatusForbidden)
+			return
+		}
+
 		http.Error(w, "Failed to delete recipe", http.StatusInternalServerError)
 		return
 	}

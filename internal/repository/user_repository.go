@@ -37,15 +37,3 @@ func (r *UserRepository) FindByEmail(email string) (*domain.User, error) {
 
 	return &user, nil
 }
-
-func (r *UserRepository) ExistsByEmail(email string) (bool, error) {
-	var count int64
-
-	if err := r.db.Model(&domain.User{}).
-		Where("email = ?", email).
-		Count(&count).Error; err != nil {
-		return false, err
-	}
-
-	return count > 0, nil
-}

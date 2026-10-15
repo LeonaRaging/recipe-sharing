@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"time"
@@ -37,14 +38,24 @@ func RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		_, err := jwt.ParseWithClaims(tokenString, jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
-			return secretKey, nil
-		})
+		claims := jwt.MapClaims{}
+
+		_, err := jwt.ParseWithClaims(
+			tokenString,
+			claims,
+			func(token *jwt.Token) (interface{}, error) {
+				return secretKey, nil
+			},
+		)
 
 		if err != nil {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
+
+		userID := int64(claims["user_id"].(float64))
+		ctx := context.WithValue(r.Context(), "user_id", userID)
+		r = r.WithContext(ctx)
 
 		next(w, r)
 	}
