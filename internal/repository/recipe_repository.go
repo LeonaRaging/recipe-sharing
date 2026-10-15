@@ -36,10 +36,17 @@ func (r *RecipeRepository) GetByID(id int64) (*domain.Recipe, error) {
 	return &recipe, nil
 }
 
-func (r *RecipeRepository) GetAll() ([]domain.Recipe, error) {
+func (r *RecipeRepository) GetAll(search string, userID int64) ([]domain.Recipe, error) {
 	var recipes []domain.Recipe
+	query := r.db
+	if search != "" {
+		query = query.Where("description ILIKE ? OR title ILIKE ?", "%"+search+"%", "%"+search+"%")
+	}
 
-	if err := r.db.Find(&recipes).Error; err != nil {
+	if userID != 0 {
+		query = query.Where("user_id = ?", userID)
+	}
+	if err := query.Find(&recipes).Error; err != nil {
 		return nil, err
 	}
 

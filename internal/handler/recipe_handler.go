@@ -91,7 +91,18 @@ func (h *RecipeHandler) HandleRecipes(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		h.CreateRecipe(w, r)
 	case http.MethodGet:
-		recipes, err := h.service.GetAllRecipes()
+		search := r.URL.Query().Get("search")
+		userIDStr := r.URL.Query().Get("userid")
+		var userID int64
+		if userIDStr != "" {
+			var errParse error
+			userID, errParse = strconv.ParseInt(userIDStr, 10, 64)
+			if errParse != nil {
+				http.Error(w, "Invalid user ID format", http.StatusBadRequest)
+				return
+			}
+		}
+		recipes, err := h.service.GetAllRecipes(search, userID)
 		if err != nil {
 			http.Error(w, "Failed to get recipes", http.StatusInternalServerError)
 			return
