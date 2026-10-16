@@ -1,9 +1,12 @@
 package service
 
 import (
+	"errors"
 	"recipe-sharing/internal/domain"
 	"recipe-sharing/internal/repository"
 )
+
+var ErrForbidden = errors.New("forbidden")
 
 type RecipeService struct {
 	repo *repository.RecipeRepository
@@ -33,6 +36,15 @@ func (s *RecipeService) GetAllRecipes(search string, userID int64) ([]domain.Rec
 	return s.repo.GetAll(search, userID)
 }
 
-func (s *RecipeService) DeleteRecipe(id int64) error {
+func (s *RecipeService) DeleteRecipe(id int64, userID int64) error {
+	recipe, err := s.repo.GetByID(id)
+	if err != nil {
+		return err
+	}
+
+	if recipe.UserID != userID {
+		return ErrForbidden
+	}
+
 	return s.repo.Delete(id)
 }
