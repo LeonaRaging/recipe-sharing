@@ -32,8 +32,8 @@ func (s *RecipeService) GetRecipe(id int64) (*domain.Recipe, error) {
 	return s.repo.GetByID(id)
 }
 
-func (s *RecipeService) GetAllRecipes() ([]domain.Recipe, error) {
-	return s.repo.GetAll()
+func (s *RecipeService) GetAllRecipes(search string, userID int64) ([]domain.Recipe, error) {
+	return s.repo.GetAll(search, userID)
 }
 
 func (s *RecipeService) DeleteRecipe(id int64, userID int64) error {
