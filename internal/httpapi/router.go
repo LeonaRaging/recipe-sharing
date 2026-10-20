@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"recipe-sharing/internal/auth"
 	"recipe-sharing/internal/handler"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func NewRouter(
@@ -11,6 +13,8 @@ func NewRouter(
 	authHandler *handler.AuthHandler,
 ) http.Handler {
 	mux := http.NewServeMux()
+
+	mux.Handle("GET /swagger/", httpSwagger.WrapHandler)
 
 	mux.HandleFunc("POST /api/auth/register", authHandler.Register)
 	mux.HandleFunc("POST /api/auth/login", authHandler.Login)

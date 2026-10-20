@@ -22,6 +22,16 @@ func NewRecipeHandler(service *service.RecipeService) *RecipeHandler {
 	}
 }
 
+// @Summary Create recipe
+// @Tags recipes
+// @Accept json
+// @Produce json
+// @Param recipe body domain.Recipe true "Recipe"
+// @Security BearerAuth
+// @Success 201 {object} domain.Recipe
+// @Failure 401 {string} string
+// @Failure 400 {string} string
+// @Router /api/recipes [post]
 func (h *RecipeHandler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -48,6 +58,16 @@ func (h *RecipeHandler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(recipe)
 }
 
+// HandleGetRecipeByID godoc
+// @Summary Get recipe by ID
+// @Tags recipes
+// @Produce json
+// @Param id path int64 true "Recipe ID"
+// @Success 200 {object} domain.Recipe
+// @Failure 400 {string} string
+// @Failure 404 {string} string
+// @Failure 500 {string} string
+// @Router /api/recipes/{id} [get]
 func (h *RecipeHandler) HandleGetRecipeByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, "/api/recipes/"), 10, 64)
 	if err != nil || id <= 0 {
@@ -71,6 +91,18 @@ func (h *RecipeHandler) HandleGetRecipeByID(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// HandleDeleteRecipeByID godoc
+// @Summary Delete recipe
+// @Tags recipes
+// @Param id path int64 true "Recipe ID"
+// @Security BearerAuth
+// @Success 204
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Failure 404 {string} string
+// @Failure 500 {string} string
+// @Router /api/recipes/{id} [delete]
 func (h *RecipeHandler) HandleDeleteRecipeByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, "/api/recipes/"), 10, 64)
 	if err != nil || id <= 0 {
@@ -98,6 +130,16 @@ func (h *RecipeHandler) HandleDeleteRecipeByID(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// HandleGetRecipes godoc
+// @Summary List recipes
+// @Description Returns all recipes, optionally filtered by search text or user ID.
+// @Tags recipes
+// @Produce json
+// @Param search query string false "Search title or description"
+// @Param userid query int false "Filter by user ID"
+// @Success 200 {array} domain.Recipe
+// @Failure 500 {string} string
+// @Router /api/recipes [get]
 func (h *RecipeHandler) HandleGetRecipes(w http.ResponseWriter, r *http.Request) {
 	search := r.URL.Query().Get("search")
 	userIDStr := r.URL.Query().Get("userid")

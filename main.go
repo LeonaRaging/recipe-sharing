@@ -11,8 +11,18 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	_ "recipe-sharing/docs"
 )
 
+// @title Recipe Sharing API
+// @version 1.0
+// @description HTTP API for sharing recipes
+// @host localhost:8080
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func run() error {
 	cfg := config.Load()
 	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
