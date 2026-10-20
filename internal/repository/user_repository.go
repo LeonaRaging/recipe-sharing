@@ -27,10 +27,14 @@ func (r *UserRepository) Create(user *domain.User) error {
 func (r *UserRepository) FindByEmail(email string) (*domain.User, error) {
 	var user domain.User
 
-	err := r.db.Where("email = ?", email).First(&user).Error
+	result := r.db.Where("email = ?", email).Limit(1).Find(&user)
 
-	if err != nil {
-		return nil, err
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &user, nil
