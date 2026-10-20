@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"recipe-sharing/internal/config"
+	"recipe-sharing/internal/domain"
 	"recipe-sharing/internal/handler"
 	"recipe-sharing/internal/httpapi"
 	"recipe-sharing/internal/repository"
@@ -29,6 +31,13 @@ func run() error {
 
 	if err != nil {
 		return err
+	}
+
+	if err := db.AutoMigrate(
+		&domain.User{},
+		&domain.Recipe{},
+	); err != nil {
+		return fmt.Errorf("run database migrations: %w", err)
 	}
 
 	recipeRepository := repository.NewRecipeRepository(db)

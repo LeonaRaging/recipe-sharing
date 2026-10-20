@@ -17,8 +17,6 @@ func NewRecipeRepository(db *gorm.DB) *RecipeRepository {
 }
 
 func (r *RecipeRepository) Create(recipe *domain.Recipe) error {
-	r.db.AutoMigrate(&domain.Recipe{})
-
 	if err := r.db.Create(&recipe).Error; err != nil {
 		return err
 	}

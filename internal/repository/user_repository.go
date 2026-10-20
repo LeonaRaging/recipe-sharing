@@ -17,8 +17,6 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 }
 
 func (r *UserRepository) Create(user *domain.User) error {
-	r.db.AutoMigrate(&domain.User{})
-
 	if err := r.db.Create(user).Error; err != nil {
 		return err
 	}
