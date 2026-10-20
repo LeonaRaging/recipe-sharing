@@ -10,6 +10,21 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgres/data
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d recipe_sharing"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      HTTP_ADDRESS: "0.0.0.0:8080"
+      DATABASE_URL: "host=db user=postgres password=postgres dbname=recipe_sharing port=5432 sslmode=disable"
+    depends_on:
+      db:
+        condition: service_healthy
 volumes:
   postgres_data:

@@ -1,5 +1,7 @@
 package config
 
+import "os"
+
 type Config struct {
 	HTTPAddress string
 	DatabaseURL string
@@ -7,7 +9,7 @@ type Config struct {
 
 func Load() Config {
 	return Config{
-		HTTPAddress: "localhost:8080",
-		DatabaseURL: "host=localhost user=postgres password=postgres dbname=recipe_sharing port=5432 sslmode=disable",
+		HTTPAddress: os.Getenv("HTTP_ADDRESS"),
+		DatabaseURL: os.Getenv("DATABASE_URL"),
 	}
 }
