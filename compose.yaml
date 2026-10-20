@@ -26,5 +26,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  
+  k6:
+    image: grafana/k6:latest
+    profiles: ["loadtest"]
+    working_dir: /scripts
+    volumes:
+      - ./scripts:/scripts:ro
+    environment:
+      BASE_URL: http://api:8080
+    depends_on:
+      api:
+        condition: service_started
+    command: run /scripts/api.js
 volumes:
   postgres_data:
