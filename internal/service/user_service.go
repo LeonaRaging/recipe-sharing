@@ -60,3 +60,12 @@ func (s *UserService) Login(email string, password string) (string, error) {
 
 	return auth.GenerateToken(user.ID)
 }
+
+func (s *UserService) GetProfile(userID int64) (*domain.User, error) {
+	user, err := s.repo.FindByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	user.Password = ""
+	return user, nil
+}

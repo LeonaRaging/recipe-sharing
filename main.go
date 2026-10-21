@@ -36,6 +36,7 @@ func run() error {
 	if err := db.AutoMigrate(
 		&domain.User{},
 		&domain.Recipe{},
+		&domain.Rating{},
 	); err != nil {
 		return fmt.Errorf("run database migrations: %w", err)
 	}
@@ -44,11 +45,15 @@ func run() error {
 	recipeService := service.NewRecipeService(recipeRepository)
 	recipeHandler := handler.NewRecipeHandler(recipeService)
 
+	ratingRepo := repository.NewRatingRepository(db)
+	ratingService := service.NewRatingService(ratingRepo, recipeRepository)
+	ratingHandler := handler.NewRatingHandler(ratingService)
+
 	userRepository := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepository)
 	authHandler := handler.NewAuthHandler(userService)
 
-	router := httpapi.NewRouter(recipeHandler, authHandler)
+	router := httpapi.NewRouter(recipeHandler, authHandler, ratingHandler)
 
 	server := &http.Server{
 		Addr:    cfg.HTTPAddress,

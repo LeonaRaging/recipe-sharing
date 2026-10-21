@@ -11,6 +11,7 @@ import (
 func NewRouter(
 	recipeHandler *handler.RecipeHandler,
 	authHandler *handler.AuthHandler,
+	ratingHandler *handler.RatingHandler,
 ) http.Handler {
 	mux := http.NewServeMux()
 
@@ -23,6 +24,11 @@ func NewRouter(
 	mux.HandleFunc("POST /api/recipes", auth.RequireAuth(recipeHandler.HandlePostRecipes))
 	mux.HandleFunc("GET /api/recipes/{id}", recipeHandler.HandleGetRecipeByID)
 	mux.HandleFunc("DELETE /api/recipes/{id}", auth.RequireAuth(recipeHandler.HandleDeleteRecipeByID))
+
+	mux.HandleFunc("GET /api/users/me", auth.RequireAuth(authHandler.GetMe))
+
+	mux.HandleFunc("POST /api/recipes/{id}/ratings", auth.RequireAuth(ratingHandler.RateRecipe))
+	mux.HandleFunc("GET /api/recipes/{id}/ratings", ratingHandler.GetRecipeRatings)
 
 	return mux
 }

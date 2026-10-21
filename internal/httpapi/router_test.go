@@ -57,7 +57,11 @@ func setupTestRouter(t *testing.T) http.Handler {
 	userService := service.NewUserService(userRepository)
 	authHandler := handler.NewAuthHandler(userService)
 
-	return httpapi.NewRouter(recipeHandler, authHandler)
+	ratingRepo := repository.NewRatingRepository(db)
+	ratingService := service.NewRatingService(ratingRepo, recipeRepository)
+	ratingHandler := handler.NewRatingHandler(ratingService)
+
+	return httpapi.NewRouter(recipeHandler, authHandler, ratingHandler)
 }
 
 func TestGetRecipes(t *testing.T) {
