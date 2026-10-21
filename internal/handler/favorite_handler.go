@@ -21,7 +21,7 @@ func getUserIDFromContext(r *http.Request) (int64, bool) {
 	return userID, ok
 }
 
-func (h *FavoriteHandler) HandleRecipeFavorites(w http.ResponseWriter, r *http.Request) {
+func (h *FavoriteHandler) AddFavorite(w http.ResponseWriter, r *http.Request) {
 	userID, ok := getUserIDFromContext(r)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -35,30 +35,35 @@ func (h *FavoriteHandler) HandleRecipeFavorites(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	if err := h.service.FavoriteRecipe(userID, recipeID); err != nil {
+		http.Error(w, "Failed to favorite recipe (maybe already favorited)", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(`{"message": "Recipe favorited successfully"}`))
+}
+
+func (h *FavoriteHandler) RemoveFavorite(w http.ResponseWriter, r *http.Request) {
+	userID, ok := getUserIDFromContext(r)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	recipeIDStr := r.PathValue("id")
+	recipeID, err := strconv.ParseInt(recipeIDStr, 10, 64)
 	if err != nil {
 		http.Error(w, "Invalid recipe ID", http.StatusBadRequest)
 		return
 	}
 
-	switch r.Method {
-	case http.MethodPost:
-		if err := h.service.FavoriteRecipe(userID, recipeID); err != nil {
-			http.Error(w, "Failed to favorite recipe (maybe already favorited)", http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(`{"message": "Recipe favorited successfully"}`))
-
-	case http.MethodDelete:
-		if err := h.service.UnfavoriteRecipe(userID, recipeID); err != nil {
-			http.Error(w, "Failed to unfavorite recipe", http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusNoContent)
-
-	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	if err := h.service.UnfavoriteRecipe(userID, recipeID); err != nil {
+		http.Error(w, "Failed to unfavorite recipe", http.StatusInternalServerError)
+		return
 	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *FavoriteHandler) HandleGetMyFavorites(w http.ResponseWriter, r *http.Request) {

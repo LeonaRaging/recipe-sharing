@@ -27,7 +27,7 @@ func NewRouter(
 
 	mux.HandleFunc("GET /api/users/me/favorites", auth.RequireAuth(favoriteHandler.HandleGetMyFavorites))
 
-	mux.HandleFunc("POST /api/recipes/{id}/favorites", auth.RequireAuth(favoriteHandler.HandleRecipeFavorites))
-	mux.HandleFunc("DELETE /api/recipes/{id}/favorites", auth.RequireAuth(favoriteHandler.HandleRecipeFavorites))
+	mux.HandleFunc("POST /api/recipes/{id}/favorites", auth.RequireAuth(favoriteHandler.AddFavorite))
+	mux.HandleFunc("DELETE /api/recipes/{id}/favorites", auth.RequireAuth(favoriteHandler.RemoveFavorite))
 	return mux
 }
