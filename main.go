@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"recipe-sharing/internal/config"
 	"recipe-sharing/internal/domain"
 	"recipe-sharing/internal/handler"
 	"recipe-sharing/internal/httpapi"
 	"recipe-sharing/internal/repository"
 	"recipe-sharing/internal/service"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
 	_ "recipe-sharing/docs"
 )
@@ -27,7 +30,17 @@ import (
 // @name Authorization
 func run() error {
 	cfg := config.Load()
-	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{
+		Logger: logger.New(
+			log.New(os.Stdout, "", log.LstdFlags),
+			logger.Config{
+				SlowThreshold:             200 * time.Millisecond,
+				LogLevel:                  logger.Error,
+				IgnoreRecordNotFoundError: true,
+				Colorful:                  false,
+			},
+		),
+	})
 
 	if err != nil {
 		return err
