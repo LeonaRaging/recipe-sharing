@@ -39,3 +39,11 @@ func (r *UserRepository) FindByEmail(email string) (*domain.User, error) {
 
 	return &user, nil
 }
+
+func (r *UserRepository) FindByID(id int64) (*domain.User, error) {
+	var user domain.User
+	if err := r.db.First(&user, id).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
