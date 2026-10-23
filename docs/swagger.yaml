@@ -1,5 +1,20 @@
 basePath: /
 definitions:
+  domain.Rating:
+    properties:
+      comment:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      recipe_id:
+        type: integer
+      score:
+        type: integer
+      user_id:
+        type: integer
+    type: object
   domain.Recipe:
     properties:
       description:
@@ -22,6 +37,13 @@ definitions:
         type: integer
       password:
         type: string
+    type: object
+  handler.RateRecipeRequest:
+    properties:
+      comment:
+        type: string
+      score:
+        type: integer
     type: object
 host: localhost:8080
 info:
@@ -222,6 +244,204 @@ paths:
       summary: Get recipe by ID
       tags:
       - recipes
+  /api/recipes/{id}/favorites:
+    delete:
+      parameters:
+      - description: Recipe ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Remove recipe from favorites
+      tags:
+      - favorites
+    post:
+      parameters:
+      - description: Recipe ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Add recipe to favorites
+      tags:
+      - favorites
+  /api/recipes/{id}/ratings:
+    get:
+      parameters:
+      - description: Recipe ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Rating'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Retrieve recipe ratings
+      tags:
+      - ratings
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Rating Score and Comment
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RateRecipeRequest'
+      - description: Recipe ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Rating'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Rate a recipe
+      tags:
+      - ratings
+  /api/users/me:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Authenticated user's profile
+      tags:
+      - auth
+  /api/users/me/favorites:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Recipe'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List authenticated user's favorite recipes
+      tags:
+      - favorites
 securityDefinitions:
   BearerAuth:
     in: header

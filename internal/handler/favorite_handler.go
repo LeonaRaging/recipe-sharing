@@ -21,6 +21,17 @@ func getUserIDFromContext(r *http.Request) (int64, bool) {
 	return userID, ok
 }
 
+// AddFavorite godoc
+// @Summary Add recipe to favorites
+// @Tags favorites
+// @Produce json
+// @Param id path int64 true "Recipe ID"
+// @Security BearerAuth
+// @Success 201 {object} map[string]string
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 500 {string} string
+// @Router /api/recipes/{id}/favorites [post]
 func (h *FavoriteHandler) AddFavorite(w http.ResponseWriter, r *http.Request) {
 	userID, ok := getUserIDFromContext(r)
 	if !ok {
@@ -44,6 +55,16 @@ func (h *FavoriteHandler) AddFavorite(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"message": "Recipe favorited successfully"}`))
 }
 
+// RemoveFavorite godoc
+// @Summary Remove recipe from favorites
+// @Tags favorites
+// @Param id path int64 true "Recipe ID"
+// @Security BearerAuth
+// @Success 204
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 500 {string} string
+// @Router /api/recipes/{id}/favorites [delete]
 func (h *FavoriteHandler) RemoveFavorite(w http.ResponseWriter, r *http.Request) {
 	userID, ok := getUserIDFromContext(r)
 	if !ok {
@@ -66,6 +87,15 @@ func (h *FavoriteHandler) RemoveFavorite(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// HandleGetMyFavorites godoc
+// @Summary List authenticated user's favorite recipes
+// @Tags favorites
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} domain.Recipe
+// @Failure 401 {string} string
+// @Failure 500 {string} string
+// @Router /api/users/me/favorites [get]
 func (h *FavoriteHandler) HandleGetMyFavorites(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

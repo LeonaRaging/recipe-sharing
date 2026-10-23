@@ -30,6 +30,8 @@ type RateRecipeRequest struct {
 // @Accept json
 // @Produce json
 // @Param body body RateRecipeRequest true "Rating Score and Comment"
+// @Param id path int64 true "Recipe ID"
+// @Security BearerAuth
 // @Success 201 {object} domain.Rating
 // @Failure 400 {string} string
 // @Failure 401 {string} string

@@ -107,6 +107,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param Authorization header string true "Bearer token"
+// @Security BearerAuth
 // @Success 200 {object} domain.User
 // @Failure 401 {string} string
 // @Failure 404 {string} string
