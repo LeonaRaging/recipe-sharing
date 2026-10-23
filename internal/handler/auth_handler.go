@@ -20,13 +20,23 @@ func NewAuthHandler(service *service.UserService) *AuthHandler {
 	}
 }
 
+type RegisterRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UserResponse struct {
+	ID    int64  `json:"id"`
+	Email string `json:"email"`
+}
+
 // Register godoc
 // @Summary Register user
 // @Tags auth
 // @Accept json
 // @Produce json
 // @Param user body domain.User true "User registration data"
-// @Success 201 {object} domain.User
+// @Success 201 {object} UserResponse
 // @Failure 400 {string} string
 // @Failure 409 {string} string
 // @Failure 500 {string} string
@@ -37,29 +47,34 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user domain.User
-
-	err := json.NewDecoder(r.Body).Decode(&user)
-
+	var req RegisterRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "invalid JSON", http.StatusBadRequest)
 		return
 	}
 
-	err = h.service.CreateUser(&user)
+	user := domain.User{
+		Email:    req.Email,
+		Password: req.Password,
+	}
 
+	err = h.service.CreateUser(&user)
 	if err != nil {
 		if errors.Is(err, service.ErrEmailExists) {
 			http.Error(w, "Email already exists", http.StatusConflict)
 			return
 		}
-
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(UserResponse{
+		ID:    user.ID,
+		Email: user.Email,
+	})
 }
 
 // Login godoc
@@ -108,7 +123,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param Authorization header string true "Bearer token"
 // @Security BearerAuth
-// @Success 200 {object} domain.User
+// @Success 200 {object} UserResponse
 // @Failure 401 {string} string
 // @Failure 404 {string} string
 // @Failure 500 {string} string
@@ -131,5 +146,8 @@ func (h *AuthHandler) GetMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(UserResponse{
+		ID:    user.ID,
+		Email: user.Email,
+	})
 }

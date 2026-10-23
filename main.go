@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"recipe-sharing/internal/auth"
 	"recipe-sharing/internal/config"
 	"recipe-sharing/internal/domain"
 	"recipe-sharing/internal/handler"
@@ -29,7 +30,12 @@ import (
 // @in header
 // @name Authorization
 func run() error {
-	cfg := config.Load()
+	cfg, err := config.Load()
+	if err != nil {
+		return fmt.Errorf("Invalid config: %w", err)
+	}
+
+	auth.InitKey(cfg.JWTKey)
 	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "", log.LstdFlags),

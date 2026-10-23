@@ -23,6 +23,7 @@ services:
     environment:
       HTTP_ADDRESS: "0.0.0.0:8080"
       DATABASE_URL: "host=db user=postgres password=postgres dbname=recipe_sharing port=5432 sslmode=disable"
+      JWT_KEY: ${JWT_KEY?Please configure JWT_KEY in the .env file.}
     depends_on:
       db:
         condition: service_healthy
