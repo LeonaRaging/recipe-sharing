@@ -9,12 +9,27 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var secretKey = []byte("my-secret-key")
+var secretKey []byte
+
+type Claims struct {
+	UserID int64 `json:"user_id"`
+	jwt.RegisteredClaims
+}
+
+func InitKey(secret string) {
+	if secret == "" {
+		panic("JWT secret key is not set")
+	}
+	secretKey = []byte(secret)
+}
 
 func GenerateToken(userID int64) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     time.Now().Add(24 * time.Hour).Unix(),
+	claims := Claims{
+		UserID: userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -38,23 +53,29 @@ func RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		claims := jwt.MapClaims{}
-
-		_, err := jwt.ParseWithClaims(
+		var claims Claims
+		token, err := jwt.ParseWithClaims(
 			tokenString,
-			claims,
+			&claims,
 			func(token *jwt.Token) (interface{}, error) {
+				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+					return nil, jwt.ErrSignatureInvalid
+				}
 				return secretKey, nil
 			},
 		)
 
-		if err != nil {
+		if err != nil || !token.Valid {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
-		userID := int64(claims["user_id"].(float64))
-		ctx := context.WithValue(r.Context(), "user_id", userID)
+		if claims.UserID <= 0 {
+			http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "user_id", claims.UserID)
 		r = r.WithContext(ctx)
 
 		next(w, r)

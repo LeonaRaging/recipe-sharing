@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"recipe-sharing/internal/auth"
 	"recipe-sharing/internal/config"
 	"recipe-sharing/internal/handler"
 	"recipe-sharing/internal/httpapi"
@@ -46,7 +48,13 @@ func performRequest(
 func setupTestRouter(t *testing.T) http.Handler {
 	t.Helper()
 
-	cfg := config.Load()
+	os.Setenv("JWT_KEY", "test-jwt-secret-key")
+
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatalf("Failed to load config: %v", err)
+	}
+	auth.InitKey(cfg.JWTKey)
 	db, _ := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 
 	recipeRepository := repository.NewRecipeRepository(db)
