@@ -21,8 +21,17 @@ func NewAuthHandler(service *service.UserService) *AuthHandler {
 }
 
 type RegisterRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" example:"alice@example.com"`
+	Password string `json:"password" example:"password123"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email" example:"alice@example.com"`
+	Password string `json:"password" example:"password123"`
+}
+
+type LoginResponse struct {
+	Token string `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 }
 
 type UserResponse struct {
@@ -35,7 +44,7 @@ type UserResponse struct {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param user body domain.User true "User registration data"
+// @Param user body RegisterRequest true "User registration data"
 // @Success 201 {object} UserResponse
 // @Failure 400 {string} string
 // @Failure 409 {string} string
@@ -82,8 +91,8 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param credentials body map[string]string true "Email and password"
-// @Success 200 {object} map[string]string
+// @Param credentials body LoginRequest true "Email and password"
+// @Success 200 {object} LoginResponse
 // @Failure 400 {string} string
 // @Failure 401 {string} string
 // @Router /api/auth/login [post]
@@ -93,10 +102,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var request struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var request LoginRequest
 
 	err := json.NewDecoder(r.Body).Decode(&request)
 
@@ -111,9 +117,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{
-		"token": token,
-	})
+	json.NewEncoder(w).Encode(LoginResponse{Token: token})
 }
 
 // GetMe godoc

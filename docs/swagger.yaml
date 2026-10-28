@@ -29,12 +29,20 @@ definitions:
       userid:
         type: integer
     type: object
-  domain.User:
+  handler.LoginRequest:
     properties:
       email:
+        example: alice@example.com
         type: string
-      id:
-        type: integer
+      password:
+        example: password123
+        type: string
+    type: object
+  handler.LoginResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
     type: object
   handler.RateRecipeRequest:
     properties:
@@ -42,6 +50,15 @@ definitions:
         type: string
       score:
         type: integer
+    type: object
+  handler.RegisterRequest:
+    properties:
+      email:
+        example: alice@example.com
+        type: string
+      password:
+        example: password123
+        type: string
     type: object
   handler.UserResponse:
     properties:
@@ -67,18 +84,14 @@ paths:
         name: credentials
         required: true
         schema:
-          additionalProperties:
-            type: string
-          type: object
+          $ref: '#/definitions/handler.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handler.LoginResponse'
         "400":
           description: Bad Request
           schema:
@@ -100,7 +113,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/domain.User'
+          $ref: '#/definitions/handler.RegisterRequest'
       produces:
       - application/json
       responses:
