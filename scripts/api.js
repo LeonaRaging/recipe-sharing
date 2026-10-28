@@ -71,13 +71,13 @@ export default function() {
         return;
     }
 
-    const list = http.get(`${BASE_URL}/api/recipes`);
+    const list = http.get(`${BASE_URL}/api/recipes?limit=50`);
     check(list, {
         'list recipes returns 200': (response) => response.status === 200,
     });
 
     const search = http.get(
-        `${BASE_URL}/api/recipes?search=${encodeURIComponent('k6 recipe')}`,
+        `${BASE_URL}/api/recipes?search=${encodeURIComponent('k6 recipe')}&limit=50`,
     );
     check(search, {
         'search recipes returns 200': (response) => response.status === 200,

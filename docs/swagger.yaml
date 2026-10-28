@@ -35,14 +35,19 @@ definitions:
         type: string
       id:
         type: integer
-      password:
-        type: string
     type: object
   handler.RateRecipeRequest:
     properties:
       comment:
         type: string
       score:
+        type: integer
+    type: object
+  handler.UserResponse:
+    properties:
+      email:
+        type: string
+      id:
         type: integer
     type: object
 host: localhost:8080
@@ -102,7 +107,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/domain.User'
+            $ref: '#/definitions/handler.UserResponse'
         "400":
           description: Bad Request
           schema:
@@ -130,6 +135,14 @@ paths:
       - description: Filter by user ID
         in: query
         name: userid
+        type: integer
+      - description: Number of recipes to return (default 50, maximum 100)
+        in: query
+        name: limit
+        type: integer
+      - description: Number of recipes to skip (default 0)
+        in: query
+        name: offset
         type: integer
       produces:
       - application/json
@@ -400,7 +413,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.User'
+            $ref: '#/definitions/handler.UserResponse'
         "401":
           description: Unauthorized
           schema:

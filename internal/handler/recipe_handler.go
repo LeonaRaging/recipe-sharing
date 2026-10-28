@@ -16,6 +16,11 @@ type RecipeHandler struct {
 	service *service.RecipeService
 }
 
+const (
+	defaultRecipeLimit = 50
+	maxRecipeLimit     = 100
+)
+
 func NewRecipeHandler(service *service.RecipeService) *RecipeHandler {
 	return &RecipeHandler{
 		service: service,
@@ -137,6 +142,8 @@ func (h *RecipeHandler) HandleDeleteRecipeByID(w http.ResponseWriter, r *http.Re
 // @Produce json
 // @Param search query string false "Search title or description"
 // @Param userid query int false "Filter by user ID"
+// @Param limit query int false "Number of recipes to return (default 50, maximum 100)"
+// @Param offset query int false "Number of recipes to skip (default 0)"
 // @Success 200 {array} domain.Recipe
 // @Failure 500 {string} string
 // @Router /api/recipes [get]
@@ -152,7 +159,28 @@ func (h *RecipeHandler) HandleGetRecipes(w http.ResponseWriter, r *http.Request)
 			return
 		}
 	}
-	recipes, err := h.service.GetAllRecipes(search, userID)
+
+	limit := defaultRecipeLimit
+	if limitValue := r.URL.Query().Get("limit"); limitValue != "" {
+		parsedLimit, err := strconv.Atoi(limitValue)
+		if err != nil || parsedLimit < 1 || parsedLimit > maxRecipeLimit {
+			http.Error(w, "limit must be between 1 and 100", http.StatusBadRequest)
+			return
+		}
+		limit = parsedLimit
+	}
+
+	offset := 0
+	if offsetValue := r.URL.Query().Get("offset"); offsetValue != "" {
+		parsedOffset, err := strconv.Atoi(offsetValue)
+		if err != nil || parsedOffset < 0 {
+			http.Error(w, "offset must be zero or greater", http.StatusBadRequest)
+			return
+		}
+		offset = parsedOffset
+	}
+
+	recipes, err := h.service.GetAllRecipes(search, userID, limit, offset)
 	if err != nil {
 		http.Error(w, "Failed to get recipes", http.StatusInternalServerError)
 		return

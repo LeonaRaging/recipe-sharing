@@ -93,7 +93,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/handler.UserResponse"
                         }
                     },
                     "400": {
@@ -138,6 +138,18 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Filter by user ID",
                         "name": "userid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of recipes to return (default 50, maximum 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of recipes to skip (default 0)",
+                        "name": "offset",
                         "in": "query"
                     }
                 ],
@@ -558,7 +570,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/handler.UserResponse"
                         }
                     },
                     "401": {
@@ -675,9 +687,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
-                },
-                "password": {
-                    "type": "string"
                 }
             }
         },
@@ -688,6 +697,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.UserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "integer"
                 }
             }

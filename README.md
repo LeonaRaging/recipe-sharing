@@ -227,7 +227,7 @@ Authorization: Bearer <jwt>
 | `POST` | `/api/auth/register` | No | Register a user |
 | `POST` | `/api/auth/login` | No | Log in and receive a JWT |
 | `GET` | `/api/users/me` | Yes | Get the authenticated user's profile |
-| `GET` | `/api/recipes` | No | List recipes; supports `search` and `userid` query parameters |
+| `GET` | `/api/recipes` | No | List up to 50 recipes; supports `search`, `userid`, `limit` (maximum 100), and `offset` query parameters |
 | `POST` | `/api/recipes` | Yes | Create a recipe owned by the authenticated user |
 | `GET` | `/api/recipes/{id}` | No | Get one recipe |
 | `DELETE` | `/api/recipes/{id}` | Yes | Delete an owned recipe |
