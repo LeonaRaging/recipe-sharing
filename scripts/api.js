@@ -66,7 +66,7 @@ export default function() {
         'create recipe returns 201': (response) => response.status === 201,
     });
 
-    const recipeId = create.json('id');
+    const recipeId = create.json('ID');
     if (!recipeId) {
         return;
     }
