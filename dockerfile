@@ -5,7 +5,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN GGOS=linux go build -o recipe-sharing
+RUN GOOS=linux go build -o recipe-sharing
 
 FROM debian:bookworm-slim
 

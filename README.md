@@ -103,11 +103,14 @@ The application reads these environment variables:
 | Variable | Description | Example |
 | --- | --- | --- |
 | `HTTP_ADDRESS` | HTTP listen address | `0.0.0.0:8080` |
+| `JWT_KEY` | Secret key used to sign and verify JWTs | `replace-with-a-long-random-secret` |
 | `DATABASE_URL` | PostgreSQL connection string | `host=localhost user=postgres password=postgres dbname=recipe_sharing port=5432 sslmode=disable` |
 
 When using `compose.yaml`, the API listens on port `8080` and PostgreSQL is
-exposed on port `5432`. For a non-local or production deployment, provide a
-real database connection string and do not use development credentials.
+exposed on port `5432`. The Compose configuration requires `JWT_KEY` to be
+defined in the environment or in a `.env` file. For a non-local or production
+deployment, provide a real database connection string, use a long random JWT
+key, and do not use development credentials.
 
 ## Run with Docker Compose
 
@@ -143,10 +146,21 @@ Compose ensures that the API starts after the database is ready.
 Set the required environment variables and start the application:
 
 ```bash
+export JWT_KEY='replace-with-a-long-random-secret'
 export HTTP_ADDRESS=localhost:8080
 export DATABASE_URL='host=localhost user=postgres password=postgres dbname=recipe_sharing port=5432 sslmode=disable'
 go run .
 ```
+
+When using Docker Compose, create a `.env` file in the project root before
+starting the services:
+
+```dotenv
+JWT_KEY=replace-with-a-long-random-secret
+```
+
+Use a unique, long, randomly generated value for deployments outside local
+development, and do not commit the `.env` file.
 
 ## API Documentation
 
