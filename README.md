@@ -61,10 +61,6 @@ The layers are organized as follows:
 - `internal/domain`: contains the core data models.
 - `docs`: generated Swagger/OpenAPI artifacts.
 
-This separation keeps HTTP concerns and database concerns out of the business
-layer and allows the repository implementations to be replaced or tested
-independently.
-
 ## Project Structure
 
 ```text
@@ -106,12 +102,6 @@ The application reads these environment variables:
 | `JWT_KEY` | Secret key used to sign and verify JWTs | `replace-with-a-long-random-secret` |
 | `DATABASE_URL` | PostgreSQL connection string | `host=localhost user=postgres password=postgres dbname=recipe_sharing port=5432 sslmode=disable` |
 
-When using `compose.yaml`, the API listens on port `8080` and PostgreSQL is
-exposed on port `5432`. The Compose configuration requires `JWT_KEY` to be
-defined in the environment or in a `.env` file. For a non-local or production
-deployment, provide a real database connection string, use a long random JWT
-key, and do not use development credentials.
-
 ## Run with Docker Compose
 
 Start PostgreSQL and the API:
@@ -138,9 +128,6 @@ To also remove the persisted PostgreSQL volume:
 docker compose down -v
 ```
 
-The API runs database migrations during startup. The PostgreSQL health check in
-Compose ensures that the API starts after the database is ready.
-
 ## Run Locally without Docker
 
 Set the required environment variables and start the application:
@@ -159,9 +146,6 @@ starting the services:
 JWT_KEY=replace-with-a-long-random-secret
 ```
 
-Use a unique, long, randomly generated value for deployments outside local
-development, and do not commit the `.env` file.
-
 ## API Documentation
 
 Interactive Swagger UI:
@@ -174,51 +158,6 @@ The Swagger documents are also available in:
 
 - [`docs/swagger.yaml`](docs/swagger.yaml)
 - [`docs/swagger.json`](docs/swagger.json)
-
-## API Reference
-
-Unless stated otherwise, request and response bodies use
-`Content-Type: application/json`.
-
-### Authentication
-
-Register a user:
-
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "email": "alice@example.com",
-  "password": "password123"
-}
-```
-
-Login:
-
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "email": "alice@example.com",
-  "password": "password123"
-}
-```
-
-The login response contains a JWT:
-
-```json
-{
-  "token": "<jwt>"
-}
-```
-
-Send it on protected requests:
-
-```http
-Authorization: Bearer <jwt>
-```
 
 ### Endpoint Summary
 
@@ -263,17 +202,6 @@ Content-Type: application/json
 }
 ```
 
-## Testing
-
-Run the Go test suite:
-
-```bash
-go test ./...
-```
-
-The router tests are located in
-[`internal/httpapi/router_test.go`](internal/httpapi/router_test.go).
-
 ## Load Testing on Kaggle CPU
 
 The repository includes a k6 scenario at
@@ -303,8 +231,7 @@ The scenario defines these acceptance thresholds:
 ### Baseline Kaggle CPU Benchmark
 
 The following result was collected by running the configured k6 workload on a
-Kaggle CPU notebook. The benchmark completed all functional checks successfully
-and had no failed HTTP requests, but it did not meet the latency thresholds:
+Kaggle CPU notebook.
 
 | Metric | Result | Threshold | Status |
 | --- | ---: | ---: | --- |
